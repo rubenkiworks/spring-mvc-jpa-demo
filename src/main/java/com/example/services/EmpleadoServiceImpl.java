@@ -24,4 +24,19 @@ public class EmpleadoServiceImpl implements EmpleadoService{
         return empleadoDao.findAll();
     }
 
+    @Override
+    public void persistirEmpleado(Empleado empleado) {
+        empleadoDao.save(empleado);
+    }
+
+    @Override
+    public void deleteEmpleado(Empleado empleado) {
+        empleadoDao.delete(empleado);
+    }
+
+    @Override
+    public Empleado getEmpleado(int idEmpleado) {
+        return empleadoDao.findById(idEmpleado).get();
+    }
+
 }

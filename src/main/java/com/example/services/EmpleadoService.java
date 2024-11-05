@@ -6,4 +6,10 @@ import com.example.entities.Empleado;
 
 public interface EmpleadoService {
     List<Empleado> getEmpleados();
+
+    void persistirEmpleado(Empleado empleado);
+
+    void deleteEmpleado(Empleado empleado);
+
+    Empleado getEmpleado(int idEmpleado);
 }
