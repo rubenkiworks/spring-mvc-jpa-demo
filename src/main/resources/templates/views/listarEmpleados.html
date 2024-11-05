@@ -7,6 +7,25 @@
 </head>
 <body>
     <h1>Listado de empleados</h1>
-    
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Primer Apellido</th>
+                <th>Fecha Alta</th>
+                <th>Salario</th>
+                <th>Genero</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each=" empleado : ${empleados}">
+                <td th:text="${empleado.nombre}"></td>
+                <td th:text="${empleado.primerApellido}"></td>
+                <td th:text="${empleado.fechaAlta}"></td>
+                <td th:text="${empleado.salario}"></td>
+                <td th:text="${empleado.genero}"></td>
+            </tr>
+        </tbody>
+    </table>
 </body>
 </html>

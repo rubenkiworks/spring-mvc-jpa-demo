@@ -3,8 +3,14 @@ package com.example.entities;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.example.models.Genero;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,8 +38,13 @@ public class Empleado {
     private String nombre;
     private String primerApellido;
     private String segundoApellido;
+
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate fechaAlta;
     private double salario;
+
+    @Enumerated(EnumType.STRING)
+    private Genero genero;
 
     @ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.PERSIST)
     private Departamento departamento;
