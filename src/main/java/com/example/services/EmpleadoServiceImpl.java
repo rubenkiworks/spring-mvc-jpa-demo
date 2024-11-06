@@ -25,8 +25,8 @@ public class EmpleadoServiceImpl implements EmpleadoService{
     }
 
     @Override
-    public void persistirEmpleado(Empleado empleado) {
-        empleadoDao.save(empleado);
+    public Empleado persistirEmpleado(Empleado empleado) {
+        return empleadoDao.save(empleado);
     }
 
     @Override

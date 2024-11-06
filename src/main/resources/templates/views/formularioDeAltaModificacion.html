@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alta/Modificacion de empleados</title>
+</head>
+<body>
+    <h1>Formulario de alta/modificacion de empleado</h1>
+
+    <form th:object="${empleado}" th:action="@{/guardarEmpleado}" method="POST">
+        <input type="hidden" name="id" id="id" th:field="*{id}">
+
+        <label for="nombre">Nombre: </label>
+        <input type="text" id="nombre" name="nombre" th:field="*{nombre}" required>
+
+        <label for="primerApellido">Primer apellido:</label>
+        <input type="text" id="primerApellido" name="primerApellido" th:field="*{primerApellido}" required>
+
+        <label for="segundoApellido">Segundo apellido:  </label>
+        <input type="text" id="segundoApellido" name="segundoApellido" th:field="*{segundoApellido}" required>
+
+        <label for="salario">Salario:</label>
+        <input type="text" id="salario" name="salario" th:field="*{salario}" required>
+
+        <label for="fechaAlta">Fecha de alta:</label>
+        <input type="date" id="fechaAlta" name="fechaAlta" th:field="*{fechaAlta}" required>
+
+        <fieldset>
+            <legend>Genero</legend>
+
+            <label for="hombre">Hombre: </label>
+            <input type="radio" name="genero" value="HOMBRE" id="hombre" th:field="*{genero}" required>
+
+            <label for="mujer">Mujer: </label>
+            <input type="radio" name="genero" value="MUJER" id="mujer" th:field="*{genero}" required>
+
+            <label for="OTRO">Otro: </label>
+            <input type="radio" name="genero" value="OTRO" id="otro" th:field="*{genero}" required>
+        </fieldset>
+
+        <label for="departamento">Departamento: </label>
+        <select name="departamento" id="departamento" th:field="*{departamento}" required>
+            <option value="">Seleccione</option>
+            <option th:each="departamento : ${departamentos}" 
+            th:value="${departamento.id}" th:text="${departamento.nombre}"></option>
+        </select>
+
+        <label for="numerosTelefono">Telefonos</label>
+        <input type="text" id="numerosTelefono" name="numerosTelefono"
+         placeholder="Separados por punto y coma">
+
+        <input type="submit" value="Enviar">
+    </form>
+</body>
+</html>
