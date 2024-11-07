@@ -16,6 +16,7 @@
                 <th>Fecha Alta</th>
                 <th>Salario</th>
                 <th>Genero</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -25,6 +26,7 @@
                 <td th:text="${empleado.fechaAlta}"></td>
                 <td th:text="${empleado.salario}"></td>
                 <td th:text="${empleado.genero}"></td>
+                <td><a th:href="@{/modificar/} + ${empleado.id}">Modificar</a></td>
             </tr>
         </tbody>
     </table>

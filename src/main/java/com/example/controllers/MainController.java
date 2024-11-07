@@ -3,11 +3,13 @@ package com.example.controllers;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -63,6 +65,10 @@ public class MainController {
 
         //LOG.info("numeros recibidos: " + numerosTelefonoRecibidos);
 
+        if(telefonoService.existenTelefonosParaElEmpleado(empleadocreado)){
+            telefonoService.eliminarTelefonosDelEmpleado(empleadocreado);
+        }
+        
         if (numerosTelefonoRecibidos != null && !numerosTelefonoRecibidos.isEmpty()) {
             String[] arrayNumeros = numerosTelefonoRecibidos.split(";");
             List<String> numeros = Arrays.asList(arrayNumeros);
@@ -78,5 +84,29 @@ public class MainController {
         }
         
         return "redirect:/empleados";
+    }
+
+    @GetMapping("/modificar/{id}")
+    public String updateEmpleado(Model model, @PathVariable(name="id", required=true) int idEmpleado){
+
+        Empleado empleado = empleadoService.getEmpleado(idEmpleado);
+        model.addAttribute("empleado", empleado);
+
+        List<Telefono> telefonos = telefonoService.getTelefonos();
+
+        List<Telefono> telefonosEmpleado = telefonos.stream()
+        .filter(t -> t.getEmpleado().getId() == idEmpleado)
+        .collect(Collectors.toList());
+
+        String numeros = telefonosEmpleado.stream()
+        .map(Telefono::getNumero)
+        .collect(Collectors.joining(";"));
+
+        model.addAttribute("numeros", numeros);
+
+        List<Departamento> departamentos = departamentoService.getDepartamentos();
+        model.addAttribute("departamentos", departamentos);
+
+        return "views/formularioDeAltaModificacion";
     }
 }

@@ -40,15 +40,16 @@
         </fieldset>
 
         <label for="departamento">Departamento: </label>
-        <select name="departamento" id="departamento" th:field="*{departamento}" required>
+        <select name="departamento" id="departamento" required>
             <option value="">Seleccione</option>
             <option th:each="departamento : ${departamentos}" 
-            th:value="${departamento.id}" th:text="${departamento.nombre}"></option>
+            th:value="${departamento.id}" th:text="${departamento.nombre}"
+            th:selected="${empleado.id != 0 and empleado.departamento.id == departamento.id}"></option>
         </select>
 
         <label for="numerosTelefono">Telefonos</label>
         <input type="text" id="numerosTelefono" name="numerosTelefono"
-         placeholder="Separados por punto y coma">
+         placeholder="Separados por punto y coma" th:value="${numeros}">
 
         <input type="submit" value="Enviar">
     </form>
