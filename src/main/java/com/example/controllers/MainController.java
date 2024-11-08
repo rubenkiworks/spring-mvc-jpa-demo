@@ -133,4 +133,20 @@ public class MainController {
 
         return "views/formularioDeAltaModificacion";
     }
+
+    @GetMapping("/detalles/{id}")
+    public String detalles(Model model, @PathVariable(name="id", required=true) int idEmpleado){
+        
+        model.addAttribute("empleado", empleadoService.getEmpleado(idEmpleado));
+
+        return "views/detallesEmpleado";
+    }
+
+    @GetMapping("/eliminar/{id}")
+    public String eliminarEmpleado(Model model, @PathVariable(name="id", required=true) int idEmpleado){
+
+        empleadoService.deleteEmpleado(empleadoService.getEmpleado(idEmpleado));
+
+        return "redirect:/empleados";
+    }
 }
