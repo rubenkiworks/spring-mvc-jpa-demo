@@ -54,4 +54,6 @@ public class Empleado implements Serializable {
 
     @OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.REMOVE, mappedBy="empleado")
     private List<Telefono> telefonos;
+
+    private String foto;
 }

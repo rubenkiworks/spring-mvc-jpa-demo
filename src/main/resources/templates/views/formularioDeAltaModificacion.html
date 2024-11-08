@@ -20,7 +20,7 @@
 <body>
     <h1>Formulario de alta/modificacion de empleado</h1>
 
-    <form th:object="${empleado}" th:action="@{/guardarEmpleado}" method="POST">
+    <form th:object="${empleado}" th:action="@{/guardarEmpleado}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" id="id" th:field="*{id}">
 
         <label class="form-label" for="nombre">Nombre: </label>
@@ -63,6 +63,9 @@
         <input class="form-control" type="text" id="numerosTelefono" name="numerosTelefono"
          placeholder="Separados por punto y coma" th:value="${numeros}">
 
+        <label for="imagen">Foto del empleado: </label>
+        <input class="form-control" type="file" name="imagen" id="imagen">
+        
         <input type="submit" value="Enviar" class="btn btn-info">
     </form>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
