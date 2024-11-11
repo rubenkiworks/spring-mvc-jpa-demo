@@ -65,24 +65,32 @@ public class MainController {
     @Transactional
     public String guardarEmpleado(@ModelAttribute(name="empleado") Empleado empleado,
     @RequestParam(name="numerosTelefono", required=false) String numerosTelefonoRecibidos,
-    @RequestParam(name="imagen", required=false) MultipartFile imagenRecibida){
+    @RequestParam(name="imagen", required=false) MultipartFile[] imagenesRecibidas){
         
-        if (!imagenRecibida.isEmpty()) {
+        if (imagenesRecibidas.length != 0) {
             Path rutaRelativa = Paths.get("src\\main\\resources\\static\\imagenes\\");
 
             String rutaAbsoluta = rutaRelativa.toFile().getAbsolutePath();
 
-            Path rutaCompleta = Paths.get(rutaAbsoluta + "\\" + imagenRecibida.getOriginalFilename());
-
-            try {
-                byte[] archivoDeImagenEnBytes = imagenRecibida.getBytes();
-                Files.write(rutaCompleta, archivoDeImagenEnBytes);
-
-                empleado.setFoto(imagenRecibida.getOriginalFilename());
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            String cadenaDeImagenes = "";
+            for(MultipartFile imagen : imagenesRecibidas){
+                Path rutaCompleta = Paths.get(rutaAbsoluta + "\\" + imagen.getOriginalFilename());
+                try {
+                    byte[] archivoDeImagenEnBytes = imagen.getBytes();
+                    Files.write(rutaCompleta, archivoDeImagenEnBytes);
+                    cadenaDeImagenes = cadenaDeImagenes + ";" + imagen.getOriginalFilename(); 
+                    //empleado.setFoto(imagen.getOriginalFilename());
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
+            
+            StringBuilder imagenes = new StringBuilder(cadenaDeImagenes);
+
+            String fotos = imagenes.deleteCharAt(0).toString();
+            empleado.setFoto(fotos);
+        
         }
 
         Empleado empleadocreado = empleadoService.persistirEmpleado(empleado);
@@ -137,7 +145,16 @@ public class MainController {
     @GetMapping("/detalles/{id}")
     public String detalles(Model model, @PathVariable(name="id", required=true) int idEmpleado){
         
-        model.addAttribute("empleado", empleadoService.getEmpleado(idEmpleado));
+        Empleado empleado = empleadoService.getEmpleado(idEmpleado);
+
+        model.addAttribute("empleado", empleado);
+
+        if (empleado.getFoto() != null) {
+            String[] arrayFotos = empleado.getFoto().split(";");
+            List<String> fotos = Arrays.asList(arrayFotos);
+            
+            model.addAttribute("fotos", fotos);
+        }
 
         return "views/detallesEmpleado";
     }

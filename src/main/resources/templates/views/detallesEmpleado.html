@@ -9,16 +9,12 @@
 <body>
     <h1 th:text="'Detalles del empleado: ' + ${empleado.nombre}"></h1>
 
-    <div id="carouselExampleFade" class="carousel slide ">
-        <div class="carousel-inner">
-          <div class="carousel-item active">
-            <img th:src="@{/imagenes/}+${empleado.foto}" alt="Imagen del empleado">
-          </div>
-          <div class="carousel-item">
-            <img th:src="@{/imagenes/}+${empleado.foto}" alt="Imagen del empleado">
-          </div>
-          <div class="carousel-item">
-            <img th:src="@{/imagenes/}+${empleado.foto}" alt="Imagen del empleado">
+    <a th:href="@{/empleados}" class="btn btn-info margin">Volver</a>
+
+    <div id="carouselExampleFade" class="carousel slide  carousel-fade"  data-bs-ride="carousel">
+        <div class="carousel-inner" th:each="foto, iter : ${fotos}">
+          <div th:class="${iter.index == 0}? 'carousel-item active':'carousel-item'">
+            <img th:src="@{/imagenes/}+${foto}" alt="Imagen del empleado" style="width: 100%; height: 450px;">
           </div>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
