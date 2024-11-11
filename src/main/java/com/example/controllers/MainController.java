@@ -21,9 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.entities.Departamento;
 import com.example.entities.Empleado;
+import com.example.entities.Foto;
 import com.example.entities.Telefono;
 import com.example.services.DepartamentoService;
 import com.example.services.EmpleadoService;
+import com.example.services.FotoService;
 import com.example.services.TelefonoService;
 
 import jakarta.transaction.Transactional;
@@ -37,6 +39,7 @@ public class MainController {
     private final EmpleadoService empleadoService;
     private final DepartamentoService departamentoService;
     private final TelefonoService telefonoService;
+    private final FotoService fotoService;
 
     private static final Logger LOG = Logger.getLogger("MainController");
     
@@ -71,9 +74,23 @@ public class MainController {
             Path rutaRelativa = Paths.get("src\\main\\resources\\static\\imagenes\\");
 
             String rutaAbsoluta = rutaRelativa.toFile().getAbsolutePath();
+            
+            List<MultipartFile> listaFotos = Arrays.asList(imagenesRecibidas);
 
-            String cadenaDeImagenes = "";
-            for(MultipartFile imagen : imagenesRecibidas){
+            listaFotos.stream().forEach(i -> {
+                Path rutaCompleta = Paths.get(rutaAbsoluta + "\\" + i.getOriginalFilename());
+                try {
+                    byte[] archivoDeImagenEnBytes = i.getBytes();
+                    Files.write(rutaCompleta, archivoDeImagenEnBytes);
+                    
+                     fotoService.persistirFoto(Foto.builder().empleado(empleado).nombreArchivo(i.getOriginalFilename()).build());
+                    //empleado.setFoto(imagen.getOriginalFilename());
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } );
+            /*for(MultipartFile imagen : imagenesRecibidas){
                 Path rutaCompleta = Paths.get(rutaAbsoluta + "\\" + imagen.getOriginalFilename());
                 try {
                     byte[] archivoDeImagenEnBytes = imagen.getBytes();
@@ -84,12 +101,12 @@ public class MainController {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-            }
+            }*/
             
-            StringBuilder imagenes = new StringBuilder(cadenaDeImagenes);
+            /* StringBuilder imagenes = new StringBuilder(cadenaDeImagenes);
 
             String fotos = imagenes.deleteCharAt(0).toString();
-            empleado.setFoto(fotos);
+            empleado.setFoto(fotos); */
         
         }
 
@@ -149,12 +166,19 @@ public class MainController {
 
         model.addAttribute("empleado", empleado);
 
-        if (empleado.getFoto() != null) {
+        List<Foto> fotografias = fotoService.getFotosByEmpleado(empleado);
+
+        List<String> nombresFotos = fotografias.stream()
+        .map(i -> i.getNombreArchivo()).collect(Collectors.toList());
+
+        /*if (empleado.getFoto() != null) {
             String[] arrayFotos = empleado.getFoto().split(";");
             List<String> fotos = Arrays.asList(arrayFotos);
             
-            model.addAttribute("fotos", fotos);
-        }
+            
+        }*/
+
+        model.addAttribute("fotosE", nombresFotos);
 
         return "views/detallesEmpleado";
     }
