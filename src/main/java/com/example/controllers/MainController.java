@@ -23,6 +23,7 @@ import com.example.entities.Departamento;
 import com.example.entities.Empleado;
 import com.example.entities.Foto;
 import com.example.entities.Telefono;
+import com.example.models.Genero;
 import com.example.services.DepartamentoService;
 import com.example.services.EmpleadoService;
 import com.example.services.FotoService;
@@ -190,4 +191,30 @@ public class MainController {
 
         return "redirect:/empleados";
     }
+
+    
+    @GetMapping("/detallesEmpleadoHombre")
+    public String detallesEmpleadoHombre(Model model) {
+        List<Empleado> empleados = empleadoService.getEmpleados();
+        
+        Empleado empleadoHombreMasAntiguo = empleados.stream()
+                    .filter(empleado -> empleado.getGenero().equals(Genero.HOMBRE) && empleado.getDepartamento().equals(departamentoService.getDepartamento(1)))
+                    .min((empleado1, empleado2) -> empleado1.getFechaAlta().compareTo(empleado2.getFechaAlta()))
+                    .get();
+        model.addAttribute("empleado", empleadoHombreMasAntiguo);
+        List<Telefono> telefonos = telefonoService.getTelefonos();
+        List<Telefono> telefonosEmpleado = telefonos.stream()
+             .filter(telefono -> telefono.getEmpleado().getId() == empleadoHombreMasAntiguo.getId())
+             .collect(Collectors.toList());
+
+        model.addAttribute("telefonos", telefonosEmpleado);
+        List<Foto> fotografias = fotoService.getFotosByEmpleado(empleadoHombreMasAntiguo);
+
+        List<String> nombresFotos = fotografias.stream()
+             .map(i -> i.getNombreArchivo()).collect(Collectors.toList());
+        
+        model.addAttribute("fotosE", nombresFotos);
+
+        return "views/detalles_del_empleado_del_examen";
+    } 
 }
