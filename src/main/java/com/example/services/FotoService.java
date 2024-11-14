@@ -9,4 +9,7 @@ public interface FotoService {
     List<Foto> getFotos();
     void persistirFoto(Foto foto);
     List<Foto> getFotosByEmpleado(Empleado empleado);
+    boolean existenFotosParaElEmpleado(Empleado empleado);
+    void eliminarFotosDelEmpleado(Empleado empleado);
 }
+

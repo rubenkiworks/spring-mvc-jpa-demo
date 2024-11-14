@@ -52,9 +52,9 @@ public class Empleado implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.PERSIST)
     private Departamento departamento;
 
-    @OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.REMOVE, mappedBy="empleado")
+    @OneToMany(fetch=FetchType.LAZY, cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH}, mappedBy="empleado")
     private List<Telefono> telefonos;
 
-    @OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.REMOVE, mappedBy="empleado")
+    @OneToMany(fetch=FetchType.LAZY, cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH}, mappedBy="empleado")
     private List<Foto> fotos;
 }

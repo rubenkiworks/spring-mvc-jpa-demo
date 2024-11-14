@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -43,10 +44,10 @@ public class MainController {
     private final FotoService fotoService;
 
     private static final Logger LOG = Logger.getLogger("MainController");
-    
+
     @GetMapping("/empleados")
-    public String listadoEmpleados(Model model){
-        
+    public String listadoEmpleados(Model model) {
+
         List<Empleado> empleados = empleadoService.getEmpleados();
 
         model.addAttribute("empleados", empleados);
@@ -55,8 +56,8 @@ public class MainController {
     }
 
     @GetMapping("/alta")
-    public String frmAlta(Model model){
-        Empleado empleado = new Empleado(); 
+    public String frmAlta(Model model) {
+        Empleado empleado = new Empleado();
         model.addAttribute("empleado", empleado);
 
         List<Departamento> departamentos = departamentoService.getDepartamentos();
@@ -67,77 +68,82 @@ public class MainController {
 
     @PostMapping("/guardarEmpleado")
     @Transactional
-    public String guardarEmpleado(@ModelAttribute(name="empleado") Empleado empleado,
-    @RequestParam(name="numerosTelefono", required=false) String numerosTelefonoRecibidos,
-    @RequestParam(name="imagen", required=false) MultipartFile[] imagenesRecibidas){
+    public String guardarEmpleado(@ModelAttribute(name = "empleado") Empleado empleado,
+            @RequestParam(name = "numerosTelefono", required = false) String numerosTelefonoRecibidos,
+            @RequestParam(name = "imagen", required = false) MultipartFile[] imagenesRecibidas) {
+
         
         if (imagenesRecibidas.length != 0) {
+            if(empleado.getId() != 0)
+                if(fotoService.existenFotosParaElEmpleado(empleado))
+                    fotoService.eliminarFotosDelEmpleado(empleado);
             Path rutaRelativa = Paths.get("src\\main\\resources\\static\\imagenes\\");
 
             String rutaAbsoluta = rutaRelativa.toFile().getAbsolutePath();
-            
+
             List<MultipartFile> listaFotos = Arrays.asList(imagenesRecibidas);
+
+            List<Foto> fotos = new ArrayList<>();
 
             listaFotos.stream().forEach(i -> {
                 Path rutaCompleta = Paths.get(rutaAbsoluta + "\\" + i.getOriginalFilename());
                 try {
                     byte[] archivoDeImagenEnBytes = i.getBytes();
                     Files.write(rutaCompleta, archivoDeImagenEnBytes);
-                    
-                     fotoService.persistirFoto(Foto.builder().empleado(empleado).nombreArchivo(i.getOriginalFilename()).build());
+
+                    fotos.add(
+                            Foto.builder()
+                                    .nombreArchivo(i.getOriginalFilename())
+                                    .empleado(empleado)
+                                    .build());
+
+                    //fotoService.persistirFoto(Foto.builder().empleado(empleado).nombreArchivo(i.getOriginalFilename()).build());
                     //empleado.setFoto(imagen.getOriginalFilename());
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-            } );
-            /*for(MultipartFile imagen : imagenesRecibidas){
-                Path rutaCompleta = Paths.get(rutaAbsoluta + "\\" + imagen.getOriginalFilename());
-                try {
-                    byte[] archivoDeImagenEnBytes = imagen.getBytes();
-                    Files.write(rutaCompleta, archivoDeImagenEnBytes);
-                    cadenaDeImagenes = cadenaDeImagenes + ";" + imagen.getOriginalFilename(); 
-                    //empleado.setFoto(imagen.getOriginalFilename());
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }*/
+            });
             
-            /* StringBuilder imagenes = new StringBuilder(cadenaDeImagenes);
-
-            String fotos = imagenes.deleteCharAt(0).toString();
-            empleado.setFoto(fotos); */
-        
+            if(empleado.getId() != 0 && !fotos.isEmpty()) 
+                empleado.setFotos(fotos);
+            else
+                empleado.setFotos(null);
         }
 
-        Empleado empleadocreado = empleadoService.persistirEmpleado(empleado);
-
-        //LOG.info("numeros recibidos: " + numerosTelefonoRecibidos);
-
-        if(telefonoService.existenTelefonosParaElEmpleado(empleadocreado)){
-            telefonoService.eliminarTelefonosDelEmpleado(empleadocreado);
-        }
         
         if (numerosTelefonoRecibidos != null && !numerosTelefonoRecibidos.isEmpty()) {
+            if(empleado.getId() != 0)
+                if(telefonoService.existenTelefonosParaElEmpleado(empleado))
+                    telefonoService.eliminarTelefonosDelEmpleado(empleado);
             String[] arrayNumeros = numerosTelefonoRecibidos.split(";");
             List<String> numeros = Arrays.asList(arrayNumeros);
 
-            numeros.stream().forEach(n -> {
-                Telefono telefono =  Telefono.builder()
-                .numero(n)
-                .empleado(empleadocreado)
-                .build();
+            final List<Telefono> telefonos = new ArrayList<>();
 
-                telefonoService.persistirTelefono(telefono);
+            numeros.stream().forEach(numero -> {
+
+            // Por cada numero de telefono tengo que construir un objeto Telefono
+                Telefono telefono = Telefono.builder()
+                        .numero(numero)
+                        .empleado(empleado)
+                        .build();
+
+                telefonos.add(telefono);
+
             });
+            if(empleado.getId() != 0)
+                empleado.setTelefonos(telefonos);
+            
         }
-        
+
+        empleadoService.persistirEmpleado(empleado);
+
         return "redirect:/empleados";
     }
 
     @GetMapping("/modificar/{id}")
-    public String updateEmpleado(Model model, @PathVariable(name="id", required=true) int idEmpleado){
+    public String updateEmpleado(Model model, @PathVariable(name = "id", required = true) int idEmpleado) {
 
         Empleado empleado = empleadoService.getEmpleado(idEmpleado);
         model.addAttribute("empleado", empleado);
@@ -145,12 +151,12 @@ public class MainController {
         List<Telefono> telefonos = telefonoService.getTelefonos();
 
         List<Telefono> telefonosEmpleado = telefonos.stream()
-        .filter(t -> t.getEmpleado().getId() == idEmpleado)
-        .collect(Collectors.toList());
+                .filter(t -> t.getEmpleado().getId() == idEmpleado)
+                .collect(Collectors.toList());
 
         String numeros = telefonosEmpleado.stream()
-        .map(Telefono::getNumero)
-        .collect(Collectors.joining(";"));
+                .map(Telefono::getNumero)
+                .collect(Collectors.joining(";"));
 
         model.addAttribute("numeros", numeros);
 
@@ -161,8 +167,8 @@ public class MainController {
     }
 
     @GetMapping("/detalles/{id}")
-    public String detalles(Model model, @PathVariable(name="id", required=true) int idEmpleado){
-        
+    public String detalles(Model model, @PathVariable(name = "id", required = true) int idEmpleado) {
+
         Empleado empleado = empleadoService.getEmpleado(idEmpleado);
 
         model.addAttribute("empleado", empleado);
@@ -170,7 +176,7 @@ public class MainController {
         List<Foto> fotografias = fotoService.getFotosByEmpleado(empleado);
 
         List<String> nombresFotos = fotografias.stream()
-        .map(i -> i.getNombreArchivo()).collect(Collectors.toList());
+                .map(i -> i.getNombreArchivo()).collect(Collectors.toList());
 
         /*if (empleado.getFoto() != null) {
             String[] arrayFotos = empleado.getFoto().split(";");
@@ -178,43 +184,45 @@ public class MainController {
             
             
         }*/
-
         model.addAttribute("fotosE", nombresFotos);
 
         return "views/detallesEmpleado";
     }
 
     @GetMapping("/eliminar/{id}")
-    public String eliminarEmpleado(Model model, @PathVariable(name="id", required=true) int idEmpleado){
+    public String eliminarEmpleado(Model model, @PathVariable(name = "id", required = true) int idEmpleado) {
 
         empleadoService.deleteEmpleado(empleadoService.getEmpleado(idEmpleado));
 
         return "redirect:/empleados";
     }
 
-    
     @GetMapping("/detallesEmpleadoHombre")
     public String detallesEmpleadoHombre(Model model) {
         List<Empleado> empleados = empleadoService.getEmpleados();
-        
+
         Empleado empleadoHombreMasAntiguo = empleados.stream()
-                    .filter(empleado -> empleado.getGenero().equals(Genero.HOMBRE) && empleado.getDepartamento().equals(departamentoService.getDepartamento(1)))
-                    .min((empleado1, empleado2) -> empleado1.getFechaAlta().compareTo(empleado2.getFechaAlta()))
-                    .get();
+                .filter(empleado -> empleado.getGenero().equals(Genero.HOMBRE)
+                && empleado.getDepartamento()
+                        .equals(departamentoService.getDepartamento(1)))
+                .min((empleado1, empleado2) -> empleado1.getFechaAlta()
+                .compareTo(empleado2.getFechaAlta()))
+                .get();
         model.addAttribute("empleado", empleadoHombreMasAntiguo);
         List<Telefono> telefonos = telefonoService.getTelefonos();
         List<Telefono> telefonosEmpleado = telefonos.stream()
-             .filter(telefono -> telefono.getEmpleado().getId() == empleadoHombreMasAntiguo.getId())
-             .collect(Collectors.toList());
+                .filter(telefono -> telefono.getEmpleado().getId()
+                == empleadoHombreMasAntiguo.getId())
+                .collect(Collectors.toList());
 
         model.addAttribute("telefonos", telefonosEmpleado);
         List<Foto> fotografias = fotoService.getFotosByEmpleado(empleadoHombreMasAntiguo);
 
         List<String> nombresFotos = fotografias.stream()
-             .map(i -> i.getNombreArchivo()).collect(Collectors.toList());
-        
+                .map(i -> i.getNombreArchivo()).collect(Collectors.toList());
+
         model.addAttribute("fotosE", nombresFotos);
 
         return "views/detalles_del_empleado_del_examen";
-    } 
+    }
 }

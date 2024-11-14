@@ -14,8 +14,8 @@
         <div class="row">
             <div class="col">
                 <h2>Numeros de telefono</h2>
-                <ul th:each="telefono : ${telefonos}" class="list-group">
-                    <li th:text="${telefono.numero}" class="list-group-item"></li>
+                <ul class="list-group">
+                    <li th:each="telefono : ${telefonos}" th:text="${telefono.numero}" class="list-group-item"></li>
                 </ul>
             </div>
             <div class="col">

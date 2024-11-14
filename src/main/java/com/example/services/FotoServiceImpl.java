@@ -31,4 +31,14 @@ public class FotoServiceImpl implements FotoService{
         return fotoDao.findByEmpleado(empleado);
     }
 
+    @Override
+    public boolean existenFotosParaElEmpleado(Empleado empleado) {
+        return fotoDao.existsByEmpleado(empleado);
+    }
+
+    @Override
+    public void eliminarFotosDelEmpleado(Empleado empleado) {
+        fotoDao.deleteByEmpleado(empleado);
+    }
+
 }
